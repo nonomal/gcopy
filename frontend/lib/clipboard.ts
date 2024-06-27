@@ -1,13 +1,11 @@
 export interface FileInfo {
   fileName: string;
   fileURL: string;
-  autoDownloaded: boolean;
 }
 
 export const initFileInfo: FileInfo = {
   fileName: "",
   fileURL: "",
-  autoDownloaded: false,
 };
 
 export interface TmpClipboard {
@@ -38,7 +36,7 @@ export async function clipboardRead() {
   let imagePngIndex = null;
   let textPlainIndex = null;
   let textHtmlIndex = null;
-  if (items) {
+  if (items && items.length > 0) {
     for (let i = 0; i < items.length; i++) {
       if (items[i].types.includes("image/png")) {
         imagePngIndex = i;

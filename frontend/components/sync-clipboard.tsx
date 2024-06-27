@@ -7,8 +7,7 @@ import { Log, Level } from "@/lib/log";
 import { DragEvent, useRef, useState } from "react";
 import clsx from "clsx";
 import { useRouter, usePathname } from "next/navigation";
-import Title from "@/components/title";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations, useFormatter } from "next-intl";
 import {
   TmpClipboard,
   initTmpClipboard,
@@ -21,32 +20,58 @@ import {
   clipboardRead,
 } from "@/lib/clipboard";
 // Chrome | Safari | Mobile Safari
-import { browserName, isAndroid } from "react-device-detect";
+import { osName, browserName, isAndroid } from "react-device-detect";
 import SyncButton from "@/components/sync-button";
+import SyncShortcut from "@/components/sync-shortcut";
+import QuickInput from "@/components/quick-input";
 
 // route: /locale?ci=123&cbi=abc
 // - ci: clipboard index
 // - cbi: clipboard blob id
 export default function SyncClipboard() {
   const t = useTranslations("SyncClipboard");
+  const format = useFormatter();
   const [fileInfo, setFileInfo] = useState<FileInfo>(initFileInfo);
   const [tmpClipboard, setTmpClipboard] =
     useState<TmpClipboard>(initTmpClipboard);
-  const [logs, setLogs] = useState<Log[]>([
-    {
-      level: Level.Warn,
-      message: t("logs.clickToSync"),
-    },
-  ]);
   // "" | interrupted-[r|w] | finished
   const [status, setStatus] = useState<string>("");
   const [dragging, setDragging] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const locale = useLocale();
   const { isLoading, loggedIn } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+
+  let initLogs = [
+    {
+      level: Level.Warn,
+      message: t("logs.pressToSync"),
+    },
+  ];
+  const recommendedBrowsers = [
+    { osName: "Windows", browsers: ["Chrome", "Edge", "Opera"] },
+    { osName: "iOS", browsers: ["Mobile Safari"] },
+    { osName: "Android", browsers: ["Chrome", "Edge"] },
+    { osName: "Mac OS", browsers: ["Chrome", "Opera", "Safari"] },
+  ];
+  recommendedBrowsers.map((item) => {
+    if (osName == item.osName && !item.browsers.includes(browserName)) {
+      initLogs = [
+        {
+          level: Level.Info,
+          message: t("logs.recommendedBrowsers", {
+            os: item.osName,
+            browsers: format.list(item.browsers),
+          }),
+        },
+        ...initLogs,
+      ];
+    }
+  });
+  const [logs, setLogs] = useState<Log[]>(initLogs);
 
   if (isLoading) {
     return (
@@ -112,15 +137,22 @@ export default function SyncClipboard() {
 
       if (browserName.includes("Safari")) {
         setStatus("interrupted-r");
-        addLog(t("logs.clickAgain"), Level.Warn);
-        addLog(t("logs.clickPaste"), Level.Warn);
+        addLog(t("logs.pressAgain"), Level.Warn);
+        addLog(t("logs.pressPaste"), Level.Warn);
         return;
       }
 
       await pushClipboard();
       return;
     }
-    addLog(t("logs.received", { type: t(xtype), index: xindex }));
+    const xclientname = response.headers.get("x-clientname");
+    addLog(
+      t("logs.received", {
+        type: t(xtype),
+        index: xindex,
+        clientname: xclientname ?? "UNKNOWN",
+      }),
+    );
 
     if (xtype == "file") {
       addLog(t("logs.autoDownload"), Level.Success);
@@ -146,7 +178,7 @@ export default function SyncClipboard() {
           blob: blob,
         });
         setStatus("interrupted-w");
-        addLog(t("logs.clickAgain"), Level.Warn);
+        addLog(t("logs.pressAgain"), Level.Warn);
         return;
       }
 
@@ -188,7 +220,6 @@ export default function SyncClipboard() {
       setFileInfo({
         fileName: decodeURI(xfilename),
         fileURL: URL.createObjectURL(blob),
-        autoDownloaded: false,
       });
       // The file did not enter the clipboard,
       // so only update the index.
@@ -203,10 +234,20 @@ export default function SyncClipboard() {
   };
 
   const pushClipboard = async () => {
-    if (!navigator.clipboard || !navigator.clipboard.read) {
-      return;
+    let blob = null;
+    if (textareaRef.current && textareaRef.current.value != "") {
+      blob = new Blob([textareaRef.current.value], { type: "text/plain" });
+      addLog(t("logs.readQuickInputSuccess"));
     }
-    let blob = await clipboardRead();
+
+    if (textareaRef.current?.value == "") {
+      if (!navigator.clipboard || !navigator.clipboard.read) {
+        return;
+      }
+      blob = await clipboardRead();
+      addLog(t("logs.readClipboardSuccess"));
+    }
+
     if (!blob) {
       addLog(t("logs.emptyClipboard"));
       return;
@@ -236,8 +277,7 @@ export default function SyncClipboard() {
       addLog(t("logs.unchanged"));
       return;
     }
-    addLog(t("logs.readSuccess"));
-    addLog(t("logs.uploading", { object: t(xtype) }));
+    addLog(t("logs.uploading"));
 
     const response = await fetch("/api/v1/clipboard", {
       method: "POST",
@@ -259,6 +299,11 @@ export default function SyncClipboard() {
       addLog(body.message, Level.Error);
       return;
     }
+
+    if (textareaRef.current && textareaRef.current.value != "") {
+      textareaRef.current.value = "";
+    }
+
     const xindex = response.headers.get("x-index");
     if (xindex == null || xindex == "0") {
       return;
@@ -278,7 +323,7 @@ export default function SyncClipboard() {
   const uploadFileHandler = async (file: File) => {
     resetLog();
 
-    addLog(t("logs.uploading", { object: file.name }));
+    addLog(t("logs.uploading"));
     const response = await fetch("/api/v1/clipboard", {
       method: "POST",
       headers: {
@@ -307,7 +352,6 @@ export default function SyncClipboard() {
     setFileInfo({
       fileName: file.name,
       fileURL: "",
-      autoDownloaded: false,
     });
     // The file did not enter the clipboard,
     // so only update the index.
@@ -380,25 +424,20 @@ export default function SyncClipboard() {
     }
   };
 
-  const autoDownloaded = () => {
-    setFileInfo((current) => {
-      return {
-        ...current,
-        autoDownloaded: true,
-      };
-    });
-  };
-
   return (
     <>
       <div className="pb-4">
-        <Title title={t("title")} subTitle={t("subTitle")}></Title>
+        <div className="pb-2 text-base font-bold">{t("title")}</div>
+        <div className="pb-2 text-sm opacity-70">
+          {t("subTitle")}
+          <SyncShortcut />
+        </div>
         <div className="grid grid-cols-9 gap-3 w-full">
           <LogBox logs={logs} />
           <SyncButton syncFunc={syncFunc} />
         </div>
       </div>
-
+      <QuickInput textareaRef={textareaRef} />
       <div className="pb-4">
         <div className="pb-2 text-sm opacity-70">
           <strong>{t("syncFile.title") + ": "}</strong>
@@ -433,10 +472,7 @@ export default function SyncClipboard() {
         >
           {!dragging && (
             <>
-              <FileLink
-                fileInfo={fileInfo}
-                autoDownloadedFunc={autoDownloaded}
-              />
+              <FileLink fileInfo={fileInfo} />
               <div className="text-lg opacity-40">
                 {t("syncFile.dragDropTip")}
               </div>
@@ -446,7 +482,7 @@ export default function SyncClipboard() {
                   if (!ensureLoggedIn()) {
                     return;
                   }
-                  inputRef.current?.click();
+                  fileInputRef.current?.click();
                 }}
               >
                 {t("syncFile.fileInputText")}
@@ -456,10 +492,10 @@ export default function SyncClipboard() {
           <input
             type="file"
             hidden
-            ref={inputRef}
+            ref={fileInputRef}
             onChange={async () => {
-              if (inputRef.current?.files) {
-                const selectedFile = inputRef.current.files[0];
+              if (fileInputRef.current?.files) {
+                const selectedFile = fileInputRef.current.files[0];
                 await uploadFileHandler(selectedFile);
               }
             }}

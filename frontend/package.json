@@ -1,11 +1,11 @@
 {
   "name": "gcopy",
-  "version": "1.2.10",
+  "version": "1.3.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3375 --experimental-https",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3375",
     "lint": "next lint",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown ."

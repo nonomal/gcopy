@@ -20,8 +20,8 @@ GCopy values your data privacy, it does not persistently store your data; it is 
 Steps:
 
 1. Open the website [https://gcopy.rutron.net](https://gcopy.rutron.net) on two devices, A and B, using a browser and log in with the same email.
-2. On device A, copy (e.g., `Ctrl+C`) and then click the button on the right side of the page.
-3. Switch to device B, click the button again, and the data will be synchronized. Now, go ahead and paste (`Ctrl+V`)!
+2. On device A, copy (e.g., `Ctrl+C`) and then press the button on the right side of the page.
+3. Switch to device B, press the button again, and the data will be synchronized. Now, go ahead and paste (`Ctrl+V`)!
 
 ## Background
 
@@ -46,7 +46,10 @@ The tested browsers and its versions are listed below:
 |Browser|Version||
 |-|-|-|
 |Chrome for Windows|Version 123.0.6312.86 (Official Build) (x86_64)|✅ Tested|
+|Edge for Windows 10|Version 124.0.2478.80 (Official build) (64-bit)|✅ Tested|
+|Opera for Windows 10|Opera One(version: 109.0.5097.68)|✅ Tested|
 |Chrome for macOS|Version 121.0.6167.85 (Official Build) (x86_64)|✅ Tested|
+|Opera for macOS|Opera One(version: 109.0.5097.68) (x86_64)|✅ Tested|
 |Safari|Version 15.6.1 (17613.3.9.1.16)|✅ Tested|
 |Safari for iOS|Version 16.1|✅ Tested|
 |Edge for HarmonyOS 3.0/4.0|Edge 122.0.2365.99|✅ Tested|
@@ -57,7 +60,7 @@ The tested browsers and its versions are listed below:
 
 - Due to browser limitations, reading and setting files directly in the clipboard are not supported. Therefore, file synchronization is achieved through uploading and downloading, ensuring a smooth user experience.
 - At any given time, only one file can be synchronized.
-- Due to limited server memory, the size of the files you synchronize must not exceed 10 MB.
+- Due to limited server memory, the size of the files you synchronize must not exceed `--max-content-length` MB.
 
 ## Community
 
@@ -80,3 +83,8 @@ Server link: https://discord.gg/pyTrT3aAaC
 Safari on iOS
 
 <img width="300" alt="screenshot on ios safari" src="docs/screenshot-ios-safari.png">
+
+## More
+
+- [Deploy by docker](/docs/deploy-by-docker.md)
+- [Deploy from source code](./docs/deploy-from-source.md)

@@ -40,8 +40,8 @@
   },
   "SyncClipboard": {
     "title": "Sync the clipboard",
-    "subTitle": "Click-click and the clipboard synced between devices.",
-    "click2sync": "Click to sync clipboard",
+    "subTitle": "Press the button and the clipboard synced between devices.",
+    "syncButtonText": "Sync clipboard",
     "text": "TEXT",
     "screenshot": "SCREENSHOT",
     "file": "FILE",
@@ -51,23 +51,30 @@
       "dragDropTip": "Drag and drop a file here",
       "fileInputText": "Choose a file"
     },
+    "quickInput": {
+      "title": "Quick input",
+      "subTitle": "Type text, press the button and the text synced between devices.",
+      "newline": "Newline"
+    },
     "logs": {
-      "clickToSync": "Click the button to sync clipboard 👉",
+      "pressToSync": "Press the button to sync clipboard 👉",
       "fetching": "Fetching...",
       "upToDate": "Already up to date.",
-      "readSuccess": "Read data from the clipboard successfully.",
+      "readClipboardSuccess": "Read data from the clipboard successfully.",
       "writeSuccess": "Written data to the clipboard successfully.",
       "autoDownload": "File download should start shortly. if not, please click the file link below.",
       "denyRead": "Not allowed to read clipboard!",
       "fileTooLarge": "Sorry, the file cannot exceed 10mb!",
-      "clickAgain": "Click again due to browser security policies 👉",
-      "clickPaste": "If the \"Paste\" appears on the page, click it to allow reading the clipboard.",
+      "pressAgain": "Press again due to browser security policies 👉",
+      "pressPaste": "If the \"Paste\" appears, press it to allow reading the clipboard.",
       "unchanged": "Clipboard unchanged.",
-      "uploading": "Uploading {object}",
+      "uploading": "Uploading...",
       "uploaded": "Uploaded {type}({index}).",
-      "received": "Received {type}({index}).",
+      "received": "Received {type}({index}) from {clientname}.",
       "unsupportedFormat": "Unsupported format: {format}.",
-      "emptyClipboard": "Clipboard is empty."
+      "emptyClipboard": "Clipboard is empty.",
+      "recommendedBrowsers": "On {os}, recommend using {browsers} browser.",
+      "readQuickInputSuccess": "Read text from quick input area successfully."
     }
   }
 }
