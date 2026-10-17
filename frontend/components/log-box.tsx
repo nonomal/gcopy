@@ -1,32 +1,43 @@
-import { Log, Level } from "@/lib/log";
+import { Log, LogLevel } from "@/lib/log";
+import { useRef, useEffect } from "react";
 
 export default function LogBox({ logs }: { logs: Log[] }) {
+  const ulRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (ulRef.current) {
+      ulRef.current.scrollTop = ulRef.current.scrollHeight;
+    }
+  }, [logs]);
+
   const listItems = logs.map((log, index) => {
     let level;
     switch (log.level) {
-      case Level.Warn:
+      case LogLevel.Warn:
         level = "text-warning";
         break;
-      case Level.Success:
+      case LogLevel.Success:
         level = "text-green-600";
         break;
-      case Level.Error:
+      case LogLevel.Error:
         level = "text-rose-600";
         break;
       default:
-        level = "";
+        level = "text-white";
         break;
     }
     return (
-      <pre data-prefix=">" key={index} className={level}>
-        <code>{log.message}</code>
-      </pre>
+      <li key={index} className={level}>
+        {log.message}
+      </li>
     );
   });
 
   return (
-    <div className="mockup-code min-h-52 col-span-9 md:col-span-7 text-sm">
-      {listItems}
+    <div className="logbox bg-neutral rounded-box h-52 col-span-9 md:col-span-7 flex flex-col  overflow-hidden py-2 text-white text-sm">
+      <ul ref={ulRef} className="overflow-auto flex-auto">
+        {listItems}
+      </ul>
     </div>
   );
 }

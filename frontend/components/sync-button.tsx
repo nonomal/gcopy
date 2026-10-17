@@ -1,6 +1,7 @@
 import { CursorArrowRippleIcon } from "@heroicons/react/24/solid";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useDevice } from "@/hooks/useDevice";
 
 export default function SyncButton({
   syncFunc,
@@ -10,12 +11,38 @@ export default function SyncButton({
   const [clicked, setClicked] = useState<boolean>(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const t = useTranslations("SyncClipboard");
+  const { isDesktop, isMacOs } = useDevice();
 
   const onClick = async () => {
     setClicked(true);
     await syncFunc();
     setClicked(false);
   };
+
+  // shortcut
+  useEffect(() => {
+    if (!isDesktop) {
+      return;
+    }
+
+    function keyDownHandler(e: globalThis.KeyboardEvent) {
+      // refer: https://support.google.com/chrome/answer/157179
+      if (
+        (!e.ctrlKey &&
+          !e.metaKey &&
+          !e.altKey &&
+          !e.shiftKey &&
+          e.key === "Enter") ||
+        (isMacOs && e.metaKey && e.key == "1") ||
+        (!isMacOs && e.ctrlKey && e.key == "1")
+      ) {
+        e.preventDefault();
+        buttonRef.current?.click();
+      }
+    }
+    document.addEventListener("keydown", keyDownHandler);
+    return () => document.removeEventListener("keydown", keyDownHandler);
+  }, [isDesktop, isMacOs]);
 
   return (
     <>
@@ -26,7 +53,7 @@ export default function SyncButton({
         onClick={onClick}
       >
         <CursorArrowRippleIcon className="h-6 w-6" />
-        {t("click2sync")}
+        {t("syncButtonText")}
       </button>
     </>
   );

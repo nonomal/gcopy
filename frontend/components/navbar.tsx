@@ -2,14 +2,19 @@
 
 import Avator from "@/components/avator";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
+import { useLocale } from "@/lib/i18n";
 import useAuth from "@/lib/auth";
+import useSystemInfo from "@/hooks/useSystemInfo";
 import pack from "@/package.json";
+import { getLoginPath } from "@/lib/navigation";
 
 export default function Navbar() {
   const locale = useLocale();
   const t = useTranslations("Navbar");
   const { isLoading, loggedIn } = useAuth();
+  const { systemInfo } = useSystemInfo();
+
   if (isLoading) {
     return null;
   }
@@ -41,7 +46,7 @@ export default function Navbar() {
             <li>
               <Link
                 href={
-                  locale == "zh"
+                  locale == "zh-CN"
                     ? "https://github.com/llaoj/gcopy/blob/v" +
                       pack.version +
                       "/docs/zh-CN/README.md"
@@ -54,11 +59,30 @@ export default function Navbar() {
                 {t("title")}
               </Link>
             </li>
+            <li>
+              <Link href="https://github.com/llaoj/gcopy" target="_blank">
+                {t("star")} ⭐
+              </Link>
+            </li>
+            <li>
+              <Link
+                href={
+                  "https://github.com/llaoj/gcopy/blob/v" +
+                  pack.version +
+                  "/docs/sponsor.md"
+                }
+                target="_blank"
+              >
+                {t("sponsor")} 💰
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
       <div className="navbar-center">
-        <a className="btn btn-ghost text-xl">GCopy</a>
+        <a className="btn btn-ghost text-xl" href="/">
+          GCopy
+        </a>
       </div>
       <div className="navbar-end">
         <a
@@ -79,11 +103,11 @@ export default function Navbar() {
         </a>
         {loggedIn ? (
           <Avator />
-        ) : (
-          <Link className="btn" href={`/${locale}/user/email-code`}>
+        ) : systemInfo ? (
+          <Link className="btn" href={getLoginPath()}>
             {t("signIn")}
           </Link>
-        )}
+        ) : null}
       </div>
     </div>
   );

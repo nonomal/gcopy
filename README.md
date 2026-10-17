@@ -13,15 +13,27 @@ A clipboard synchronization service between different operating systems.
 
 GCopy values your data privacy, it does not persistently store your data; it is all kept in memory. If you are inactive for 24h, the data will expire.
 
+## Authentication
+
+Users authenticate with an 8-character token, which is used as the shared clipboard key across devices.
+
+## Quick Start
+
+**Try it now:** Visit [https://gcopy.llaoj.cn](https://gcopy.llaoj.cn) to experience GCopy directly.
+
+**Self-host:** See deployment guides below:
+- [Deploy by Docker](docs/deploy-by-docker.md) — using the official container image
+- [Deploy from Source](docs/deploy-from-source.md) — build and run from source, or download the release binary
+
 ## Usage
 
-![screanshot on chrome](docs/screenshot-chrome.png)
+![screenshot on chrome](docs/screenshot-chrome.png)
 
 Steps:
 
-1. Open the website [https://gcopy.rutron.net](https://gcopy.rutron.net) on two devices, A and B, using a browser and log in with the same email.
-2. On device A, copy (e.g., `Ctrl+C`) and then click the button on the right side of the page.
-3. Switch to device B, click the button again, and the data will be synchronized. Now, go ahead and paste (`Ctrl+V`)!
+1. Open the website on two devices, A and B, using a browser and log in with the same token.
+2. On device A, copy (e.g., `Ctrl+C`) and then press the button on the right side of the page.
+3. Switch to device B, press the button again, and the data will be synchronized. Now, go ahead and paste (`Ctrl+V`)!
 
 ## Background
 
@@ -35,7 +47,7 @@ This is not ideal!
 
 Therefore, I developed GCopy to address these issues. Currently, you can share the clipboard across PC, Mac, and mobile devices, supporting text, screenshots, and files. It has low network requirements, allowing different devices to be on the same local network or not.
 
-Initially, I used Git as the backend storage and utilized scripts like PowerShell and osascript to synchronize the clipboard between different devices. However, due to its dependence on Git, it was not user-friendly for non-technical users. So, I replaced Git with Golang to serve as a data transfer service between different devices, but it still required users to download and run the GCopy client on their devices, creating a barrier to entry. That led to the development of the current version, 'GCopy v1.0', as a web service. You can directly access the website [https://gcopy.rutron.net](https://gcopy.rutron.net) without worrying about data leakage.
+Initially, I used Git as the backend storage and utilized scripts like PowerShell and osascript to synchronize the clipboard between different devices. However, due to its dependence on Git, it was not user-friendly for non-technical users. So, I replaced Git with Golang to serve as a data transfer service between different devices, but it still required users to download and run the GCopy client on their devices, creating a barrier to entry. That led to the development of the current version, 'GCopy v1.0', as a web service. You can directly access the website [https://gcopy.llaoj.cn](https://gcopy.llaoj.cn) without worrying about data leakage.
 
 ## Browser compatibility
 
@@ -45,19 +57,34 @@ The tested browsers and its versions are listed below:
 
 |Browser|Version||
 |-|-|-|
-|Chrome for Windows|Version 123.0.6312.86 (Official Build) (x86_64)|✅ Tested|
+|Chrome for Android|107.0.5304.105|✅ Tested|
 |Chrome for macOS|Version 121.0.6167.85 (Official Build) (x86_64)|✅ Tested|
+|Chrome for Windows|Version 123.0.6312.86 (Official Build) (x86_64)|✅ Tested|
+|Edge for Android|Edge 108.0.1462.48|✅ Tested|
+|Edge for HarmonyOS 3.0/4.0|Edge 122.0.2365.99|✅ Tested|
+|Edge for Linux|Edge 130.0.2849.52|✅ Tested|
+|Edge for Windows 10|Version 124.0.2478.80 (Official build) (64-bit)|✅ Tested|
+|Opera for macOS|Opera One(version: 109.0.5097.68) (x86_64)|✅ Tested|
+|Opera for Windows 10|Opera One(version: 109.0.5097.68)|✅ Tested|
 |Safari|Version 15.6.1 (17613.3.9.1.16)|✅ Tested|
 |Safari for iOS|Version 16.1|✅ Tested|
-|Edge for HarmonyOS 3.0/4.0|Edge 122.0.2365.99|✅ Tested|
-|Chrome for Android|107.0.5304.105|✅ Tested|
-|Edge for Android|Edge 108.0.1462.48|✅ Tested|
 
 ## Limitations
 
 - Due to browser limitations, reading and setting files directly in the clipboard are not supported. Therefore, file synchronization is achieved through uploading and downloading, ensuring a smooth user experience.
 - At any given time, only one file can be synchronized.
-- Due to limited server memory, the size of the files you synchronize must not exceed 10 MB.
+- Due to limited server memory, the size of the files you synchronize must not exceed `-max-content-length` MB.
+
+## Sponsor
+
+GCopy requires cloud server resources to keep the online service running. If you find GCopy helpful, please consider supporting:
+
+- Give a [GitHub Star](https://github.com/llaoj/gcopy) ⭐
+- Or make a donation (any amount is greatly appreciated 😄)
+
+Thank you for your support!
+
+[Buy me a coffee](docs/sponsor.md)
 
 ## Community
 
@@ -79,4 +106,9 @@ Server link: https://discord.gg/pyTrT3aAaC
 
 Safari on iOS
 
-<img width="300" alt="screenshot on ios safari" src="docs/screenshot-ios-safari.png">
+<img width="300" alt="screenshot on ios safari" src="docs/screenshot-ios-safari.jpeg">
+
+## More
+
+- [Deploy by Docker](/docs/deploy-by-docker.md)
+- [Deploy from source code](/docs/deploy-from-source.md)

@@ -1,77 +1,70 @@
 .PHONY: all \
-        vet fmt version test \
-        push-container release clean gomod
+        vet fmt version release test \
+        push-container clean gomod \
+        frontend-build
 
-# PLATFORMS is the set of OS_ARCH that NPD can build against.
-LINUX_PLATFORMS=linux_amd64
-DOCKER_PLATFORMS=linux/amd64
-PLATFORMS=$(LINUX_PLATFORMS) windows_amd64
-
-# VERSION is the version of the binary.
+DOCKER_PLATFORMS=linux/amd64,linux/arm64
 VERSION=$(shell cat version.txt)
-
-# TAG is the tag of the container image, default to binary version.
 TAG?=$(VERSION)
-
-# REGISTRY is the container registry to push into.
-REGISTRY?=registry.cn-beijing.aliyuncs.com/llaoj
-
-# PKG is the package name of gcopy repo.
+REGISTRY?=docker.io/llaoj
 PKG:=github.com/llaoj/gcopy
-
-# GCOPY_IMAGE is the image name of the gcopy container image.
-GCOPY_IMAGE:=$(REGISTRY)/gcopy:$(TAG)
-# GCOPY_FRONTEND_IMAGE is the image name of the gcopy web client container image.
-GCOPY_FRONTEND_IMAGE:=$(REGISTRY)/gcopy-frontend:$(TAG)
-
-# Disable cgo by default to make the binary statically linked.
+GCOPY_IMAGE_REPO:=$(REGISTRY)/gcopy
 CGO_ENABLED:=0
+OS_ARCHS ?= linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
+STATIC_DIR=internal/static/dist
+
+# Frontend build output directory for Go embed
+STATIC_DIR=internal/static/dist
 
 version:
 	@echo $(VERSION)
-	cd frontend && npm version $(VERSION) && cd ..
+	cd frontend && npm version $(VERSION) --allow-same-version && npm run prettier && cd ..
+
+frontend-build:
+	rm -rf $(STATIC_DIR)
+	cd frontend && npm ci && npm run build
+	cp -r frontend/out $(STATIC_DIR)
 
 vet:
-	go list -tags "" ./... | grep -v "./vendor/*" | xargs go vet -tags ""
+	go vet ./...
 
 fmt:
-	find . -type f -name "*.go" | grep -v "./vendor/*" | xargs gofmt -s -w -l
+	gofmt -s -w -l $(shell find . -type f -name '*.go' -not -path './vendor/*')
+	cd frontend && npm run prettier && cd ..
 
 test: vet fmt
 	go test -timeout=1m -v -race -short ./...
 
-output/linux_amd64/bin/%:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) \
-	  CC=x86_64-linux-gnu-gcc go build \
-		-o $@ \
-		-ldflags '-X $(PKG)/pkg/version.version=$(VERSION)' \
-		./cmd
-	touch $@
-
-output/windows_amd64/bin/%.exe:
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build \
-		-o $@ \
-		-ldflags '-X $(PKG)/pkg/version.version=$(VERSION)' \
-		./cmd
-	touch $@
-
-output/darwin_amd64/bin/%:
-	GOOS=darwin GOARCH=amd64 CGO_ENABLED=$(CGO_ENABLED) go build \
-		-o $@ \
-		-ldflags '-X $(PKG)/pkg/version.version=$(VERSION)' \
-		./cmd
-	touch $@
+bin/gcopy: frontend-build
+	@for os_arch in $(OS_ARCHS); do \
+		os=$${os_arch%%/*}; \
+		arch=$${os_arch##*/}; \
+		echo "Building bin/gcopy-$(VERSION)-$$os-$$arch ..."; \
+		CGO_ENABLED=$(CGO_ENABLED) GOOS=$$os GOARCH=$$arch go build \
+			-o bin/gcopy-$(VERSION)-$$os-$$arch \
+			-ldflags '-X $(PKG)/pkg/version.version=$(VERSION)' \
+			./cmd; \
+	done
 
 push-container: clean
 	docker buildx create --platform $(DOCKER_PLATFORMS) --use
-	docker buildx build --push --platform $(DOCKER_PLATFORMS) -t $(GCOPY_IMAGE) -f build/gcopy/Dockerfile .
-	docker buildx build --push --platform $(DOCKER_PLATFORMS) -t $(GCOPY_FRONTEND_IMAGE) -f build/frontend/Dockerfile .
+	docker buildx build --push --platform $(DOCKER_PLATFORMS) --build-arg VERSION=$(VERSION) -t $(GCOPY_IMAGE_REPO):$(TAG) -t $(GCOPY_IMAGE_REPO):latest -f build/Dockerfile .
 
 clean:
-	rm -rf output/
+	rm -rf bin/
+	rm -rf $(STATIC_DIR)
 	rm -f coverage.out
 
 gomod:
 	go mod tidy
 	go mod vendor
 	go mod verify
+
+release:
+	@if [ -z "$(NEW_VERSION)" ]; then echo "Usage: make release NEW_VERSION=vX.Y.Z"; exit 1; fi
+	@echo $(NEW_VERSION) > version.txt
+	$(MAKE) version
+	git add version.txt frontend/package.json frontend/package-lock.json
+	git commit -m "release $(NEW_VERSION)"
+	git tag -a $(NEW_VERSION) -m "$(NEW_VERSION)"
+	@echo "Created tag $(NEW_VERSION). Push with: git push origin main --tags"

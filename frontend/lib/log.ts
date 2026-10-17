@@ -1,4 +1,8 @@
-export enum Level {
+import { useState, useEffect } from "react";
+import { osName, browserName } from "react-device-detect";
+import { useTranslations, useFormatter } from "next-intl";
+
+export enum LogLevel {
   Warn = "warn",
   Error = "error",
   Success = "success",
@@ -6,6 +10,76 @@ export enum Level {
 }
 
 export interface Log {
-  level: Level;
+  level?: LogLevel;
   message: string;
+  isProgress?: boolean; // 标识是否为进度日志
+}
+
+const recommendedBrowsers = [
+  { osName: "Windows", browsers: ["Chrome", "Edge", "Opera"] },
+  { osName: "iOS", browsers: ["Mobile Safari"] },
+  { osName: "Android", browsers: ["Chrome", "Edge"] },
+  { osName: "Mac OS", browsers: ["Chrome", "Opera", "Safari"] },
+];
+
+export function useLog() {
+  const t = useTranslations("SyncClipboard");
+  const format = useFormatter();
+
+  const [logs, setLogs] = useState<Log[]>([]);
+
+  useEffect(() => {
+    const initLogs: Log[] = [
+      {
+        level: LogLevel.Warn,
+        message: t("logs.pressToSync"),
+      },
+    ];
+
+    recommendedBrowsers.forEach((item) => {
+      if (osName == item.osName && !item.browsers.includes(browserName)) {
+        initLogs.unshift({
+          level: LogLevel.Info,
+          message: t("logs.recommendedBrowsers", {
+            os: item.osName,
+            browsers: format.list(item.browsers),
+          }),
+        });
+      }
+    });
+
+    setLogs(initLogs);
+  }, [t, format]);
+
+  const addLog = (log: Log) => {
+    setLogs((current) => [
+      ...current,
+      {
+        level: log.level ?? LogLevel.Info,
+        message: log.message,
+        isProgress: log.isProgress,
+      },
+    ]);
+  };
+
+  const updateProgressLog = (message: string) => {
+    setLogs((current) => {
+      const lastIndex = current.length - 1;
+      if (lastIndex >= 0 && current[lastIndex].isProgress) {
+        // 更新最后一条进度日志
+        const updated = [...current];
+        updated[lastIndex] = { ...updated[lastIndex], message };
+        return updated;
+      } else {
+        // 添加新的进度日志
+        return [...current, { message, isProgress: true }];
+      }
+    });
+  };
+
+  const resetLog = () => {
+    setLogs([]);
+  };
+
+  return { logs, addLog, resetLog, updateProgressLog };
 }

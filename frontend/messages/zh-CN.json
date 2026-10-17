@@ -1,0 +1,90 @@
+{
+  "Metadata": {
+    "title": "GCopy - 不同设备间的剪切板同步服务",
+    "description": "GCopy是一个不同设备间的剪切板同步服务, 它支持文字, 截图和文件. 只需要点击两下就实现数据同步."
+  },
+  "Navbar": {
+    "title": "文档",
+    "signIn": "登录",
+    "star": "点个 Star",
+    "sponsor": "支持一下"
+  },
+  "Notice": {
+    "title": "注意",
+    "shareClipboard": "当浏览器询问是否允许<strong>查看复制到剪切板的文字和图片</strong>时, 点击 <strong>允许</strong>.",
+    "supportedBrowsers": "支持的浏览器/操作系统",
+    "etc": "等等.",
+    "protectPrivacy": "GCopy保护您的隐私, 它仅在内存中临时存储最新剪切板数据. GCopy并不持久化存储您的数据."
+  },
+  "Avator": {
+    "logout": "登出",
+    "scanQRLogin": "扫码在其他设备登录",
+    "copyLink": "复制链接",
+    "copied": "已复制"
+  },
+  "TokenLogin": {
+    "title": "令牌登录",
+    "back": "返回",
+    "generateTitle": "生成新令牌",
+    "generateSubTitle": "生成一个令牌用于剪切板同步",
+    "verifyTitle": "输入令牌",
+    "verifySubTitle": "输入已有令牌访问共享剪切板",
+    "generateButton": "生成令牌",
+    "verifyButton": "使用令牌",
+    "placeholder": "输入8位令牌",
+    "yourToken": "您的令牌：",
+    "caseSensitive": "字母区分大小写（大写和小写是不同的）。",
+    "startUsing": "开始使用",
+    "invalidToken": "无效的令牌，请检查后重试。",
+    "generateFailed": "生成令牌失败，请重试。",
+    "verifyFailed": "验证令牌失败，请重试。"
+  },
+  "SyncClipboard": {
+    "title": "同步剪切板",
+    "subTitle": "按下按钮剪切板就能在不同设备间同步.",
+    "syncButtonText": "同步剪切板",
+    "text": "文字",
+    "screenshot": "截图",
+    "file": "文件",
+    "syncFile": {
+      "title": "同步文件",
+      "subTitle": "选择一个文件然后在不同设备间同步它.",
+      "dragDropTip": "把文件拖拽到这里",
+      "fileInputText": "选择一个文件"
+    },
+    "quickInput": {
+      "title": "快捷输入",
+      "subTitle": "输入文字后按下同步按钮就能在不同设备间同步.",
+      "newline": "换行"
+    },
+    "history": {
+      "title": "历史记录",
+      "subTitle": "仅存储在本地浏览器并且可以随时删除.",
+      "delete": "删除",
+      "use": "使用",
+      "empty": "空"
+    },
+    "logs": {
+      "pressToSync": "按下按钮同步剪切板 👉",
+      "fetching": "正在获取...",
+      "upToDate": "已经是最新.",
+      "readClipboardSuccess": "成功读取剪切板.",
+      "writeSuccess": "数据成功写入剪切板.",
+      "autoDownload": "文件会很快自动下载. 如果没有, 点击下面的文件链接.",
+      "denyRead": "不允许读取剪切板!",
+      "fileTooLarge": "文件大小 ({size} MiB) 超过最大限制 ({limit} MiB).",
+      "pressAgain": "因为浏览器安全策略, 请再次按下 👉",
+      "pressPaste": "如果出现\"粘贴\"按钮, 按下它以允许读取剪切板.",
+      "unchanged": "剪切板没有改变.",
+      "uploading": "正在上传...",
+      "uploaded": "已上传 {type}({index}).",
+      "received": "已接收 {type}({index}) 来自 {clientname}.",
+      "unsupportedFormat": "不支持的格式: {format}.",
+      "emptyClipboard": "剪切板是空的.",
+      "recommendedBrowsers": "在{os}上, 推荐使用{browsers}浏览器.",
+      "readQuickInputSuccess": "成功读取快捷输入区文字.",
+      "pinLimit": "最多可以Pin 10条记录.",
+      "specialClipboardPleasePaste": "检测到特殊剪贴板内容（如微信图片），请按 Ctrl+V（Mac: Cmd+V）粘贴。"
+    }
+  }
+}
